@@ -1,121 +1,84 @@
-// 連接到MySQL資料庫
-/* const db = mysql.createConnection({
-    host: 'localhost', // 資料庫主機
-    user: 'liziweb',    // 資料庫用戶名
-    password: 'zxcvb920526',  // 資料庫密碼
-    database: 'liziweb'  // 資料庫名稱
-});
+const express = require('express');  // 引入 express 模組
+const bcrypt = require('bcrypt');    // 引入 bcrypt 模組進行密碼加密
+const nodemailer = require('nodemailer'); // 引入 nodemailer 模組發送郵件
+const session = require('express-session'); // 引入 express-session 用來管理會話
 
-// 資料庫連接成功後的回調函數
-db.connect((err) => {
-    if (err) throw err; // 如果連接失敗，拋出錯誤
-    console.log('資料庫連接成功'); // 顯示資料庫連接成功訊息
-}); */
+const app = express(); // 初始化 express 應用程式
 
-// 註冊邏輯處理
+// 中介軟體設置
+app.use(express.json()); // 用來解析 application/json
+app.use(express.urlencoded({ extended: true })); // 用來解析 application/x-www-form-urlencoded
+app.use(session({ secret: 'your-session-secret', resave: false, saveUninitialized: true }));
+
+// 註冊邏輯
 app.post('/register', (req, res) => {
     const { username, password, department, email } = req.body;
 
-    // 檢查帳號或電子郵件是否已存在於資料庫中
-    /* const checkQuery = 'SELECT * FROM employees WHERE username = ? OR email = ?';
-    db.query(checkQuery, [username, email], (err, results) => {
+    // 這裡原本應該查詢資料庫的部分，我們已經刪除
+    // 假設不檢查重複的帳號或郵件
+
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
         if (err) {
-            console.error(err); // 顯示資料庫錯誤
-            return res.status(500).send('資料庫錯誤');
+            console.error(err);
+            return res.status(500).send('密碼加密錯誤');
         }
 
-        if (results.length > 0) {
-            return res.status(400).send('帳號或電子郵件已存在'); // 如果資料庫已經有相同帳號或郵件，返回錯誤訊息
-        }
+        // 在這裡原本是要插入資料庫的部分，我們已經刪除
+        // 假設成功註冊
 
-        // 密碼加密
-        bcrypt.hash(password, 10, (err, hashedPassword) => {
-            if (err) {
-                console.error(err); // 顯示密碼加密錯誤
-                return res.status(500).send('密碼加密錯誤');
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'your-email@gmail.com',
+                pass: 'your-email-password'
             }
-
-            // 插入新員工資料到資料庫
-            const insertQuery = 'INSERT INTO employees (username, password, department, email) VALUES (?, ?, ?, ?)';
-            db.query(insertQuery, [username, hashedPassword, department, email], (err, result) => {
-                if (err) {
-                    console.error(err); // 顯示資料庫錯誤
-                    return res.status(500).send('註冊失敗');
-                }
-
-                // 註冊成功，發送電子郵件通知
-                const transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: {
-                        user: 'your-email@gmail.com',  // 替換為有效的郵箱地址
-                        pass: 'your-email-password'    // 替換為有效的郵箱密碼或使用應用程式密碼
-                    }
-                });
-
-                const mailOptions = {
-                    from: 'your-email@gmail.com',
-                    to: email, // 發送通知的電子郵件地址
-                    subject: '註冊成功',
-                    text: '您的帳號已成功註冊！'
-                };
-
-                transporter.sendMail(mailOptions, (err, info) => {
-                    if (err) {
-                        console.error(err); // 顯示發送郵件錯誤
-                    } else {
-                        console.log('電子郵件已發送：' + info.response); // 顯示郵件發送成功訊息
-                    }
-                });
-
-                res.send('註冊成功！'); // 註冊成功後顯示成功訊息
-            });
         });
-    }); */
 
-    res.send('註冊功能已停用'); // 假設這是回應訊息，註明功能已停用
+        const mailOptions = {
+            from: 'your-email@gmail.com',
+            to: email,
+            subject: '註冊成功',
+            text: '您的帳號已成功註冊！'
+        };
+
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log('電子郵件已發送：' + info.response);
+            }
+        });
+
+        res.send('註冊成功！');
+    });
 });
 
 // 登入邏輯處理
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
-    // 查詢資料庫中的使用者
-    /* const query = 'SELECT * FROM employees WHERE username = ?';
-    db.query(query, [username], (err, results) => {
+    // 這裡原本應該查詢資料庫的部分，我們已經刪除
+    // 假設帳號和密碼正確
+
+    // 密碼檢查邏輯
+    bcrypt.compare(password, '預設密碼哈希', (err, isMatch) => {
         if (err) {
-            console.error('資料庫查詢錯誤:', err); // 顯示資料庫查詢錯誤
+            console.error('密碼比對錯誤:', err);
             return res.status(500).send('伺服器錯誤');
         }
 
-        if (results.length === 0) {
-            console.log('用戶不存在:', username); // 顯示用戶不存在訊息
-            return res.render('login', { message: '帳號或密碼錯誤' }); // 顯示錯誤訊息
+        if (!isMatch) {
+            console.log('密碼錯誤:', username);
+            return res.render('login', { message: '帳號或密碼錯誤' });
         }
 
-        const user = results[0];
+        // 登入成功，設定會話
+        req.session.userId = 1; // 假設登入的用戶ID
+        req.session.username = username;
+        console.log('登入成功:', username);
 
-        // 比對密碼
-        bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (err) {
-                console.error('密碼比對錯誤:', err); // 顯示密碼比對錯誤
-                return res.status(500).send('伺服器錯誤');
-            }
-
-            if (!isMatch) {
-                console.log('密碼錯誤:', username); // 顯示密碼錯誤訊息
-                return res.render('login', { message: '帳號或密碼錯誤' }); // 顯示錯誤訊息
-            }
-
-            // 登入成功，設定會話
-            req.session.userId = user.id;
-            req.session.username = user.username;
-            console.log('登入成功:', username); // 顯示登入成功訊息
-
-            res.redirect('/employee-dashboard'); // 轉向員工儀表板
-        });
-    }); */
-
-    res.send('登入功能已停用'); // 假設這是回應訊息，註明功能已停用
+        res.redirect('/employee-dashboard'); // 轉向員工儀表板
+    });
 });
 
 // 員工儀表板頁面
@@ -124,25 +87,24 @@ app.get('/employee-dashboard', (req, res) => {
         return res.redirect('/login'); // 如果使用者未登入，重定向到登入頁面
     }
 
-    const userId = req.session.userId;
-    // 資料庫查詢部分已停用
-    res.send('員工儀表板功能已停用'); // 顯示功能已停用訊息
+    // 假設員工資訊靜態顯示
+    const user = { id: req.session.userId, username: req.session.username };
+    res.render('employee-dashboard', { user: user }); // 顯示員工儀表板頁面
 });
 
 // 顯示公告頁面
 app.get('/announcements', (req, res) => {
-    // 查詢資料庫中的公告
-    /* const query = 'SELECT * FROM announcements ORDER BY created_at DESC';  // 假設您的公告表格叫做 'announcements'
-    
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('資料庫查詢錯誤:', err); // 顯示資料庫查詢錯誤
-            return res.status(500).send('伺服器錯誤');
-        }
+    // 假設這裡顯示靜態公告
+    const announcements = [
+        { id: 1, title: '公司公告 1', content: '內容 1' },
+        { id: 2, title: '公司公告 2', content: '內容 2' }
+    ];
 
-        // 將查詢結果傳遞給 EJS 模板
-        res.render('announcements', { announcements: results }); // 顯示公告頁面
-    }); */
+    res.render('announcements', { announcements: announcements }); // 顯示公告頁面
+});
 
-    res.send('公告頁面功能已停用'); // 顯示功能已停用訊息
+// 啟動伺服器
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`伺服器運行在 ${PORT} 端口`);
 });

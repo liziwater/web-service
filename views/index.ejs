@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誠訊整合服務系統 IMS</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('header') %> <!-- 引用共享的 header -->
+
+    <main>
+        <h1>誠訊整合服務系統 IMS</h1>
+        <p>探索創新的企業整合服務，助您實現數位化轉型。</p>
+
+        <h2>最新公告</h2>
+        <ul>
+            <% announcements.forEach(function(announcement) { %>
+                <li>
+                    <strong><%= announcement.title %></strong>: <%= announcement.content %>
+                    <p><em>發佈時間: <%= announcement.created_at %></em></p>
+                </li>
+            <% }); %>
+        </ul>
+    </main>
+
+    <footer>
+        © 2024 Chengxun IMS. All Rights Reserved.
+    </footer>
+</body>
+</html>

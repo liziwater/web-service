@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公告</title>
+</head>
+<body>
+    <h1>公司公告</h1>
+    <ul>
+        <% announcements.forEach(function(announcement) { %>
+            <li><%= announcement.title %>: <%= announcement.content %></li>
+        <% }); %>
+    </ul>
+    <a href="/">回到首頁</a>
+</body>
+</html>
